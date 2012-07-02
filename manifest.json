@@ -4,6 +4,7 @@
   "manifest_version": 2,
   "description": "禁用Google搜索结果链接安全检查的中转.",
   "icons": {
+      "128": "icon128.png",
       "48": "icon48.png"
   },
   "background": { "scripts": [ "background.js" ] },
