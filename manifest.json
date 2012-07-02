@@ -3,11 +3,14 @@
   "version": "1.0",
   "manifest_version": 2,
   "description": "禁用Google搜索结果链接安全检查的中转.",
-  // "background": { "scripts": [ "background.js" ] },
-  "content_scripts": [
-    {
-      "matches": ["*://www.google.com/*", "*://www.google.com.hk/webhp*"],
-      "js": ["jquery-1.7.2.min.js", "contentscript.js"]
-    }
+  "icons": {
+      "48": "icon48.png"
+  },
+  "background": { "scripts": [ "background.js" ] },
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "*://www.google.com.hk/url?*",
+    "*://www.google.com/url?*"
   ]
 }
