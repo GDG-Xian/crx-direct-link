@@ -1,6 +1,6 @@
 {
   "name": "Direct LINK",
-  "version": "1.0",
+  "version": "1.1",
   "manifest_version": 1,
   "description": "禁用Google搜索结果链接安全检查的中转.",
   "icons": {
@@ -11,7 +11,7 @@
   "permissions": [
     "webRequest",
     "webRequestBlocking",
-    "*://www.google.com.hk/url?*",
-    "*://www.google.com/url?*"
+    "*://*.google.com/*",
+    "*://*.google.com.hk/*"
   ]
 }
