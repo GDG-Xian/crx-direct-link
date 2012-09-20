@@ -1,17 +1,21 @@
 {
   "name": "Direct LINK",
-  "version": "1.1.1",
+  "version": "1.2",
   "manifest_version": 2,
   "description": "禁用Google搜索结果链接安全检查的中转.",
   "icons": {
       "128": "icon128.png",
       "48": "icon48.png"
   },
+  "browser_action": {
+    "default_title": "管理中转域名",
+    "default_popup": "popup.html",
+    "default_icon": "icon48.png"
+  },
   "background": { "scripts": [ "background.js" ] },
   "permissions": [
     "webRequest",
     "webRequestBlocking",
-    "*://*.google.com/*",
-    "*://*.google.com.hk/*"
+    "<all_urls>"
   ]
 }
