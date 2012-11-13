@@ -4,3 +4,4 @@ h3 { color: #555; background: #ddd; font-size: 16px; line-height: 20px; margin: 
 .domain-list li:hover { background: #eee; }
 .domain-list li label span { color: blue; }
 .footer { height: 22px; background: #ddd; text-align: right; }
+.pull-left { float: left; }

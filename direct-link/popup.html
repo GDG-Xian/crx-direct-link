@@ -47,6 +47,9 @@
             <li><label><input type="checkbox" class="domain" value="www.google.se" /> 瑞典 <span>www.google.se</span></label></li>
             <li><label><input type="checkbox" class="domain" value="www.google.vg" /> 维京群岛 <span>www.google.vg</span></label></li>
         </ul>
-        <div class="footer"><label><input type="checkbox" id="show-enabled-only" /> 仅显示启用的域名</label></div>
+        <div class="footer">
+            <label class="pull-left" title="如果启用此项，点击搜索结果会立即跳转到目标地址，不进行Google链接安全检查，如果禁用此项，则只在安全检查页面出错（比如被墙）时才启用跳转"><input type="checkbox" id="skip-safe-check" /> 跳过安全检查</label>
+            <label><input type="checkbox" id="show-enabled-only" /> 仅显示启用的域名</label>
+        </div>
     </body>
 </html>
