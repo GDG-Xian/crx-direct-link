@@ -5,12 +5,13 @@
   "description": "禁用Google搜索结果链接安全检查的中转.",
   "icons": {
       "128": "icon128.png",
-      "48": "icon48.png"
+      "48": "icon48.png",
+      "19": "icon19.png"
   },
-  "browser_action": {
+  "page_action": {
     "default_title": "管理中转域名",
     "default_popup": "popup.html",
-    "default_icon": "icon48.png"
+    "default_icon": "icon19.png"
   },
   "background": { "scripts": [ "background.js" ] },
   "permissions": [
