@@ -2,8 +2,12 @@ var RE_SEARCH = /https?\:\/\/(www\.google\.[^\/]+)\/url\?.*/;
 var RE_IMAGES = /https?\:\/\/(www\.google\.[^\/]+)\/imgres\?.*/;
 var FILTERS = { urls: ['<all_urls>'], types: ['main_frame'] };
 
-function get_option(name) {
-    return localStorage[name];
+function config(key, value) {
+    if (value === undefined) {
+        return localStorage[key];
+    } else {
+        return (localStorage[key] = value); 
+    }
 }
 
 function registerTab(tabId, directUrl, targetUrl) {
