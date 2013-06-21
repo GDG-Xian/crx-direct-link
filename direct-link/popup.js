@@ -2,7 +2,11 @@ var app = chrome.extension.getBackgroundPage(),
     mode = app.config('mode') || 'AUTO';
 
 function modeChangeHandler() {
-    app.config('mode', this.value);
+    var mode = this.value;
+    app.config('mode', mode);
+    chrome.tabs.query({ currentWindow: true, active: true }, function(tabs) {
+        app.showModeIcon(tabs[0].id, mode);
+    }); 
 }
 
 var modeNodes = document.getElementsByName('mode');

@@ -10,12 +10,26 @@ function config(key, value) {
     }
 }
 
+// 获取当前模式，如果没有设置，则为 AUTO
+function currentMode() {
+    return config('mode') || 'AUTO';
+}
+
+// 切换跳转模式，并根据模式显示不同的图标
+function showModeIcon(tabId, mode) {
+    if (localStorage['direct_url_' + tabId] && localStorage['target_url_' + tabId]) {
+        console.log('Updating page icon for tab', tabId, 'with mode', mode);
+        setTimeout(function() {
+            chrome.pageAction.setIcon({ tabId: tabId, path: 'icon19-' + mode + '.png' });
+            chrome.pageAction.show(tabId);
+        }, 200);
+    }
+}
 
 // 中转请求控制器
 function dispatcherHandler(handlerType) {
-    
     return function(details) { 
-        var mode = config('mode') || 'AUTO';
+        var mode = currentMode();
 
         if (RE_SEARCH.test(details.url)) {
             var targetUrl = details.url.match(/url=([^&]+)/ig) && decodeURIComponent(RegExp.$1);
@@ -33,7 +47,6 @@ function dispatcherHandler(handlerType) {
                 }
             }
         }
-
     }
 }
 
@@ -43,9 +56,12 @@ chrome.webRequest.onBeforeRequest.addListener(dispatcherHandler('DIRECT'), FILTE
 
 // 标签更新时，检测如果注册的 URL 为 Google 搜索结果中转链接，则显示图标
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    if (localStorage['direct_url_' + tabId] && localStorage['target_url_' + tabId]) {
-        chrome.pageAction.show(tabId);
-    }
+    showModeIcon(tabId, currentMode());
+});
+
+// 页面激活时更新图标
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+    showModeIcon(activeInfo.tabId, currentMode());
 });
 
 // 关闭标签时清除标记

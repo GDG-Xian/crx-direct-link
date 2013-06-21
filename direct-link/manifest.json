@@ -2,16 +2,15 @@
   "name": "Direct LINK",
   "version": "1.3",
   "manifest_version": 2,
-  "description": "禁用Google搜索结果链接安全检查的中转.",
+  "description": "禁用Google搜索结果链接安全检查的中转",
   "icons": {
       "128": "icon128.png",
       "48": "icon48.png",
       "19": "icon19.png"
   },
   "page_action": {
-    "default_title": "管理中转域名",
-    "default_popup": "popup.html",
-    "default_icon": "icon19.png"
+    "default_title": "切换跳转模式",
+    "default_popup": "popup.html"
   },
   "background": { "scripts": [ "background.js" ] },
   "permissions": [
