@@ -1,33 +1,18 @@
-var app = chrome.extension.getBackgroundPage();
+var app = chrome.extension.getBackgroundPage(),
+    mode = app.config('mode') || 'AUTO';
 
-$(function() {
-    var $show_enabled = $('#show-enabled-only');
-    var $skip_safe_check = $('#skip-safe-check');
+function modeChangeHandler() {
+    var mode = this.value;
+    app.config('mode', mode);
+    chrome.tabs.query({ currentWindow: true, active: true }, function(tabs) {
+        app.showModeIcon(tabs[0].id, mode);
+    }); 
+}
 
-    // 选中已经启用的域名
-    app.iter_enabled_domains(function(domain_name) {
-        $('.domain[value="' + domain_name + '"]').prop('checked', true); 
-    });
-
-    $('.domain-list .domain').click(function() {
-        var $this = $(this);
-        app.toggle_domain($this.val(), $this.prop('checked'));
-        if ($show_enabled.prop('checked')) {
-            $this.parents('li').hide(); 
-        }
-    });
-    
-    // 启用域名过滤 
-    $show_enabled.click(function() {
-        var flag = $show_enabled.prop('checked');
-        $('.domain-list li .domain').not(':checked').parents('li').toggle(!flag);
-    });
-    
-    $skip_safe_check.click(function() {
-        var flag = $skip_safe_check.prop('checked');
-        app.toggle_safe_check(flag); 
-    });
-
-    $skip_safe_check.prop('checked', app.get_option('skip-safe-check') === 'true');
-});
+var modeNodes = document.getElementsByName('mode');
+for (var i = 0; i < modeNodes.length; i++) {
+    var modeNode = modeNodes[i];
+    if (mode === modeNode.value) modeNode.checked = 'checked';
+    modeNode.addEventListener('click', modeChangeHandler, false);
+}
 

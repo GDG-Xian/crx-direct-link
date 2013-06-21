@@ -1,103 +1,72 @@
-var RE_SEARCH = /https?\:\/\/(www\.google\.[^\/]+)\/url\?.*/;
-var RE_IMAGES = /https?\:\/\/(www\.google\.[^\/]+)\/imgres\?.*/;
-var FILTERS = { urls: ['<all_urls>'], types: ['main_frame', 'sub_frame'] };
+var RE_SEARCH = /https?\:\/\/(www\.google\.[^\/]+)\/url\?.*/,
+    FILTERS = { urls: ['<all_urls>'], types: ['main_frame'] };
 
-function get_option(name) {
-    return localStorage[name];
-}
-
-// 启用和禁用域名
-function toggle_domain(domain_name, enabled) {
-    if (enabled) {
-        localStorage[domain_name] = 'domain-enabled';
+// 设置或者读取 localStorage 的配置方法
+function config(key, value) {
+    if (value === undefined) {
+        return localStorage[key];
     } else {
-        delete localStorage[domain_name];
+        return (localStorage[key] = value); 
     }
 }
 
-// 启用和禁用安全检查
-function toggle_safe_check(enabled) {
-    localStorage['skip-safe-check'] = enabled; 
+// 获取当前模式，如果没有设置，则为 AUTO
+function currentMode() {
+    return config('mode') || 'AUTO';
 }
 
-// 遍历域名
-function iter_enabled_domains(handler) {
-    for (var key in localStorage) {
-        if (localStorage[key] === 'domain-enabled') {
-            handler(key);
-        }
+// 切换跳转模式，并根据模式显示不同的图标
+function showModeIcon(tabId, mode) {
+    if (localStorage['direct_url_' + tabId] && localStorage['target_url_' + tabId]) {
+        console.log('Updating page icon for tab', tabId, 'with mode', mode);
+        setTimeout(function() {
+            chrome.pageAction.setIcon({ tabId: tabId, path: 'icon19-' + mode + '.png' });
+            chrome.pageAction.show(tabId);
+        }, 200);
     }
 }
 
-// 如果是第一次运行，将 www.google.com 和 www.google.com.hk 默认启用
-function execute_setup() {
-    var firstRun = (localStorage['firstRun'] === 'true');
-    if (!firstRun) {
-      localStorage['firstRun'] = 'true';
-      localStorage['skip-safe-check'] = 'true';
-      localStorage['www.google.com'] = 'domain-enabled';
-      localStorage['www.google.com.hk'] = 'domain-enabled';
-    } else {
-      localStorage['skip-safe-check'] = localStorage['skip-safe-check'] || true;
-    }
+// 中转请求控制器
+function dispatcherHandler(handlerType) {
+    return function(details) { 
+        var mode = currentMode();
 
-    
-    chrome.webRequest.onErrorOccurred.addListener(function(details) {
-        return handler_wrapper('error', details); 
-    }, FILTERS);
-    chrome.webRequest.onBeforeRequest.addListener(function(details) {
-        return handler_wrapper('before', details); 
-    }, FILTERS, ['blocking']);
-}
-execute_setup();
+        if (RE_SEARCH.test(details.url)) {
+            var targetUrl = details.url.match(/url=([^&]+)/ig) && decodeURIComponent(RegExp.$1);
 
-function empty() {}
+            localStorage['direct_url_' + details.tabId] = details.url; 
+            localStorage['target_url_' + details.tabId] = targetUrl; 
 
-function handler_wrapper(type, details) {
-    details.direct_type = type;
-    if (localStorage['skip-safe-check'] === 'true') {
-        return type === 'error' ? empty() : direct_handler(details); 
-    } else {
-        return type === 'before' ? empty() : direct_handler(details); 
-    }
-}
+            if (mode !== 'REDIRECT' && mode === handlerType) {
 
-function direct_handler(details) {
-
-    if (RE_SEARCH.test(details.url)) {
-        try {
-            var url = details.url.match(/url=([^&]+)/ig) 
-                && decodeURIComponent(RegExp.$1);
-            var domain = details.url.match(RE_SEARCH) && RegExp.$1;
-            if (domain in localStorage) {
-                console.debug('Page Url: ' + url);
-                if (details.direct_type === 'error') {
-                    chrome.tabs.update(details.tabId, { 'url': url });
+                console.info(mode, '=>', targetUrl);
+                if (mode === 'AUTO') {
+                    chrome.tabs.update(details.tabId, { 'url': targetUrl });
                 } else {
-                    return { redirectUrl: url };
+                    return { redirectUrl: targetUrl };
                 }
             }
-        } catch (e) {
-            console.error(e);
-        }
-    } else if (RE_IMAGES.test(details.url)) {
-        try {
-            var url = details.url.match(/imgurl=([^&]+)/ig) 
-                && decodeURIComponent(RegExp.$1);
-            var refer = details.url.match(/imgrefurl=([^&]+)/ig) 
-                && decodeURIComponent(RegExp.$1);
-            var domain = details.url.match(RE_IMAGES) && RegExp.$1;
-            if (domain in localStorage) {
-                console.debug('Image Url: ' + url);
-                console.debug('Refer Url: ' + refer);
-                if (details.direct_type === 'error') {
-                    chrome.tabs.update(details.tabId, { 'url': url });
-                } else {
-                    return { redirectUrl: url };
-                }
-            }
-        } catch (e) {
-            console.error(e);
         }
     }
 }
+
+// 注册跳转处理事件
+chrome.webRequest.onErrorOccurred.addListener(dispatcherHandler('AUTO'), FILTERS);
+chrome.webRequest.onBeforeRequest.addListener(dispatcherHandler('DIRECT'), FILTERS, ['blocking']);
+
+// 标签更新时，检测如果注册的 URL 为 Google 搜索结果中转链接，则显示图标
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+    showModeIcon(tabId, currentMode());
+});
+
+// 页面激活时更新图标
+chrome.tabs.onActivated.addListener(function(activeInfo) {
+    showModeIcon(activeInfo.tabId, currentMode());
+});
+
+// 关闭标签时清除标记
+chrome.tabs.onRemoved.addListener(function(tabId) {
+    delete localStorage['direct_url_' + tabId];
+    delete localStorage['target_url_' + tabId];
+});
+
