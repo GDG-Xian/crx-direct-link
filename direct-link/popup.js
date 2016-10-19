@@ -1,18 +1,16 @@
-var app = chrome.extension.getBackgroundPage(),
-    mode = app.config('mode') || 'AUTO';
+const app = chrome.extension.getBackgroundPage();
 
 function modeChangeHandler() {
-    var mode = this.value;
-    app.config('mode', mode);
-    chrome.tabs.query({ currentWindow: true, active: true }, function(tabs) {
-        app.showModeIcon(tabs[0].id, mode);
-    }); 
+    let mode = this.value;
+    app.setMode(mode);
 }
 
-var modeNodes = document.getElementsByName('mode');
-for (var i = 0; i < modeNodes.length; i++) {
-    var modeNode = modeNodes[i];
-    if (mode === modeNode.value) modeNode.checked = 'checked';
-    modeNode.addEventListener('click', modeChangeHandler, false);
-}
+let modeNodes = document.getElementsByName('mode');
+let currentMode = app.getMode();
+modeNodes.forEach(modeNode => {
+  if (modeNode.value == currentMode) {
+    modeNode.checked = 'checked';
+  }
 
+  modeNode.addEventListener('click', modeChangeHandler, false);
+});

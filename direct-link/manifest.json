@@ -7,9 +7,10 @@
       "128": "icon128.png",
       "48": "icon48.png"
   },
-  "page_action": {
+  "browser_action": {
     "default_title": "切换跳转模式",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": "icon48.png"
   },
   "background": { "scripts": [ "background.js" ] },
   "permissions": [
