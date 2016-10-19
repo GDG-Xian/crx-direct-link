@@ -27,7 +27,6 @@ function setMode(mode) {
 
 function updatePopup(event) {
     const locales = LOCALES[getMode()];
-    console.dir(locales);
 
     chrome.browserAction.setIcon({ path: locales.icon });
     chrome.browserAction.setTitle({ title: `${locales.title}\n${locales.message}` });
